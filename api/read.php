@@ -5,7 +5,9 @@ header('Content-Type: application/json');
 try {
     $db = new PDO('mysql:host=127.0.0.1;dbname=pweb_async', 'root', '');
 } catch (\Exception $e) {
-    die($e->getMessage());
+    http_response_code(500);
+    echo json_encode(['message' => $e->getMessage()]);
+    exit;
 }
 
 $query = 'SELECT * FROM tour_packages';
