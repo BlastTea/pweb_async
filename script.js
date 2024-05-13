@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const container = document.querySelector('.products-area-wrapper');
 
-    setState(data, container);
+    setState(response.data, container);
 
     container.addEventListener('click', async (event) => {
       if (event.target.classList.contains('edit-button')) {
