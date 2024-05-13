@@ -816,3 +816,8 @@ dialog button[type="submit"]:hover {
   display: block;
   color: white;
 }
+
+#addModal label {
+  display: block;
+  color: white;
+}

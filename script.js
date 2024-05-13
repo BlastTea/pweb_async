@@ -1,3 +1,6 @@
+/**
+ * Mengambil data dari server dan mengupdate tampilan saat halaman selesai dimuat.
+ */
 document.addEventListener("DOMContentLoaded", async function () {
   try {
     var request = await fetch("api/read.php");
@@ -6,12 +9,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const container = document.querySelector(".products-area-wrapper");
     setState(response.data, container);
     container.addEventListener("click", async (event) => {
-      if (event.target.classList.contains("edit-button")) {
-        const id = event.target
-          .closest(".products-row")
-          .querySelector(".id").textContent;
-        // alert(`Edit ${id}`); // Hanya untuk tujuan demonstrasi, ganti dengan fungsi untuk membuka modal edit
-      } else if (event.target.classList.contains("delete-button")) {
+      if (event.target.classList.contains("delete-button")) {
         await deleteData(event, container);
       }
     });
@@ -20,71 +18,110 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 });
 
-// Fungsi untuk membuka modal edit
-function openEditModal(productData) {
-  // Mendapatkan elemen modal edit
-  const editModal = document.getElementById("editModal");
+/**
+ * Menangani klik pada tombol tambah produk untuk membuka modal tambah data.
+ */
+document.getElementById("addButton").addEventListener("click", function () {
+  document.getElementById("addModal").showModal();
+});
 
-  // Mengisi nilai input pada modal dengan data produk
+/**
+ * Menutup modal tambah data.
+ */
+function closeAddModal() {
+  document.getElementById("addModal").close();
+}
+
+/**
+ * Menangani submit form tambah data, mengirimkan data ke server dan memperbarui tampilan.
+ */
+document.getElementById("addForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const formData = new FormData(this);
+
+  try {
+    const response = await fetch("api/create.php", {
+      method: "POST",
+      body: formData,
+    });
+
+    const responseData = await response.json();
+
+    if (response.ok) {
+      // Refresh data
+      const updatedResponse = await fetch("api/read.php");
+      const updatedData = await updatedResponse.json();
+
+      setState(
+        updatedData.data,
+        document.querySelector(".products-area-wrapper")
+      );
+      closeAddModal();
+    } else {
+      throw new Error(responseData.message);
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+  }
+});
+
+/**
+ * Membuka modal edit dengan data produk yang akan diedit.
+ * @param {Object} productData - Data produk yang akan diisi ke dalam form modal.
+ */
+function openEditModal(productData) {
+  const editModal = document.getElementById("editModal");
   document.getElementById("editId").value = productData.id;
   document.getElementById("editName").value = productData.name;
   document.getElementById("editPrice").value = productData.price;
   document.getElementById("editDescription").value = productData.description;
-
-  // Memunculkan modal
   editModal.showModal();
 }
-// Fungsi untuk menutup modal edit
+
+/**
+ * Menutup modal edit.
+ */
 function closeEditModal() {
   const editModal = document.getElementById("editModal");
   editModal.close();
 }
 
-// Event listener untuk form modal edit
-document
-  .getElementById("editForm")
-  .addEventListener("submit", async function (event) {
-    event.preventDefault();
+/**
+ * Menangani submit form edit data, mengirimkan data yang diedit ke server dan memperbarui tampilan.
+ */
+document.getElementById("editForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const formData = new FormData(this);
+  console.log("Form Data:", Object.fromEntries(formData));
 
-    // Mengambil data dari form
-    const formData = new FormData(this);
+  try {
+    const response = await fetch("api/update.php", {
+      method: "POST",
+      body: formData,
+    });
 
-    // Log untuk memeriksa data yang akan dikirim
-    console.log("Form Data:", Object.fromEntries(formData));
+    const responseData = await response.json();
 
-    try {
-      // Mengirim data produk yang diedit ke server untuk disimpan
-      const response = await fetch("api/update.php", {
-        method: "POST",
-        body: formData,
-      });
-
-      const responseData = await response.json();
-
-      // Memastikan status code dari response
-      if (!response.ok) {
-        throw new Error(responseData.message || "Error updating data");
-      }
-
-      // Mengambil data produk terbaru dari server
-      const updatedResponse = await fetch("api/read.php");
-      const updatedData = await updatedResponse.json();
-
-      // Memperbarui tampilan dengan data produk yang terbaru
-      setState(
-        updatedData.data,
-        document.querySelector(".products-area-wrapper")
-      );
-
-      // Menutup modal edit
-      closeEditModal();
-    } catch (error) {
-      console.error("Error:", error);
+    if (!response.ok) {
+      throw new Error(responseData.message || "Error updating data");
     }
-  });
+
+    const updatedResponse = await fetch("api/read.php");
+    const updatedData = await updatedResponse.json();
+
+    setState(
+      updatedData.data,
+      document.querySelector(".products-area-wrapper")
+    );
+
+    closeEditModal();
+  } catch (error) {
+    console.error("Error:", error);
+  }
+});
 
 /**
- * Fungsi yang digunakan untuk menghapus data dari server.\
+ * Fungsi yang digunakan untuk menghapus data dari server.
  * Setelah konfirmasi dari pengguna, data dihapus melalui API dan tampilan di-update.
  *
  * @param {Event} event - Event yang memicu fungsi, biasanya click event.
@@ -108,15 +145,11 @@ async function deleteData(event, container) {
 
   try {
     var request = await fetch(`api/delete.php?id=${id}`, { method: "DELETE" });
-
     var response = await request.json();
-
     ensureStatusCode(request, response);
 
     request = await fetch("api/read.php");
-
     response = await request.json();
-
     ensureStatusCode(request, response);
 
     setState(response.data, container);
@@ -126,11 +159,10 @@ async function deleteData(event, container) {
 }
 
 /**
- * Fungsi untuk mengupdate tampilan berdasarkan data terkini dari server.\
- * Fungsi ini membersihkan container dan mengisi ulang dengan data yang ada atau menampilkan pesan jika tidak ada data.\
- * \
- * Gunakan fungsi ini ketika terjadi perubahan pada data, misalnya setelah create, update, atau delete.\
- * \
+ * Fungsi untuk mengupdate tampilan berdasarkan data terkini dari server.
+ * Fungsi ini membersihkan container dan mengisi ulang dengan data yang ada atau menampilkan pesan jika tidak ada data.
+ * 
+ * Gunakan fungsi ini ketika terjadi perubahan pada data, misalnya setelah create, update, atau delete.
  * Bisa juga digunakan ketika data di read pertama kali.
  *
  * @param {Array} data - Array objek produk yang diterima dari API.
@@ -138,7 +170,6 @@ async function deleteData(event, container) {
  */
 function setState(data, container) {
   const body = container.querySelector(".products-body");
-  
   body.innerHTML = "";
 
   if (data && data.length > 0) {
@@ -164,9 +195,7 @@ function setState(data, container) {
       const descriptionCell = document.createElement("div");
       descriptionCell.className = "product-cell description";
       const shortDescription = item.description.substring(0, 50);
-      descriptionCell.innerHTML = `<span class="cell-label">Deskripsi:</span>${shortDescription}${
-        item.description.length > 50 ? "..." : ""
-      }`;
+      descriptionCell.innerHTML = `<span class="cell-label">Deskripsi:</span>${shortDescription}${item.description.length > 50 ? "..." : ""}`;
       row.appendChild(descriptionCell);
 
       const actionCell = document.createElement("div");
@@ -174,43 +203,43 @@ function setState(data, container) {
       actionCell.innerHTML = `<button class="edit-button">Edit</button> <button class="delete-button">Hapus</button>`;
       row.appendChild(actionCell);
 
-      body.appendChild(row); // Menambahkan baris produk ke dalam body, bukan container
+      body.appendChild(row);
 
-      // Menambahkan event listener untuk tombol edit pada setiap baris produk
       const editButton = row.querySelector(".edit-button");
       editButton.addEventListener("click", () => {
         openEditModal(item);
       });
     });
   } else {
-    body.innerHTML = "<p>No products available.</p>"; // Jika tidak ada data, tampilkan pesan di dalam body
+    body.innerHTML = "<p>No products available.</p>";
   }
 }
+
 /**
- * Memastikan bahwa status response dari fetch sesuai dengan ekspektasi (misalnya, status OK).\
+ * Memastikan bahwa status response dari fetch sesuai dengan ekspektasi (misalnya, status OK).
  * Jika status response tidak sesuai, fungsi ini akan melempar error.
  *
  * @param {Response} request - Objek response dari fetch API.
  * @param {Object} response - Objek yang di-parse dari JSON response yang mungkin berisi pesan error atau data lain.
  */
 function ensureStatusCode(request, response) {
-  if (!request.ok)
-    throw new Error(`Error while trying to fetch data: ${response.message}`);
+  if (!request.ok) throw new Error(`Error while trying to fetch data: ${response.message}`);
 }
 
+// Mengatur tampilan filter
 document.querySelector(".jsFilter").addEventListener("click", function () {
   document.querySelector(".filter-menu").classList.toggle("active");
 });
 
+// Mengatur tampilan grid
 document.querySelector(".grid").addEventListener("click", function () {
   document.querySelector(".list").classList.remove("active");
   document.querySelector(".grid").classList.add("active");
   document.querySelector(".products-area-wrapper").classList.add("gridView");
-  document
-    .querySelector(".products-area-wrapper")
-    .classList.remove("tableView");
+  document.querySelector(".products-area-wrapper").classList.remove("tableView");
 });
 
+// Mengatur tampilan list
 document.querySelector(".list").addEventListener("click", function () {
   document.querySelector(".list").classList.add("active");
   document.querySelector(".grid").classList.remove("active");
@@ -218,6 +247,7 @@ document.querySelector(".list").addEventListener("click", function () {
   document.querySelector(".products-area-wrapper").classList.add("tableView");
 });
 
+// Mengatur mode switch
 var modeSwitch = document.querySelector(".mode-switch");
 modeSwitch.addEventListener("click", function () {
   document.documentElement.classList.toggle("light");
