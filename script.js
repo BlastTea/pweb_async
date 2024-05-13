@@ -1,49 +1,64 @@
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async function () {
   try {
-
     var request = await fetch('http://127.0.0.1/kuliah/PWEB/Pertemuan%2013/api/read.php');
-    
+
     var response = await request.json();
 
-    displayData(response);
+    displayData(response.data);
   } catch (e) {
     console.error(e);
   }
 });
 
 function displayData(data) {
-  const container = document.getElementById('data-container');
-  container.innerHTML = ''; // Membersihkan konten yang ada sebelumnya
+  const container = document.querySelector('.products-area-wrapper');
 
-  // Cek apakah data ada dan memiliki elemen
   if (data && data.length > 0) {
-      data.forEach(item => {
-          const productDiv = document.createElement('div');
-          productDiv.className = 'product';
+    data.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'products-row';
 
-          // Menambahkan judul nama paket
-          const name = document.createElement('h2');
-          name.textContent = item.name;
-          productDiv.appendChild(name);
+      const idCell = document.createElement('div');
+      idCell.className = 'product-cell id';
+      idCell.innerHTML = `<span class="cell-label">Id:</span>${item.id}`;
+      row.appendChild(idCell);
 
-          // Menambahkan deskripsi
-          const description = document.createElement('p');
-          description.textContent = item.description;
-          productDiv.appendChild(description);
+      const nameCell = document.createElement('div');
+      nameCell.className = 'product-cell name';
+      nameCell.innerHTML = `<span class="cell-label">Name:</span>${item.name}`;
+      row.appendChild(nameCell);
 
-          // Menambahkan harga
-          const price = document.createElement('p');
-          price.textContent = `Harga: Rp${item.price}`;
-          productDiv.appendChild(price);
+      const priceCell = document.createElement('div');
+      priceCell.className = 'product-cell price';
+      priceCell.innerHTML = `<span class="cell-label">Price:</span>Rp${item.price}`;
+      row.appendChild(priceCell);
 
-          // Tambahkan elemen ke container
-          container.appendChild(productDiv);
-      });
+      const descriptionCell = document.createElement('div');
+      descriptionCell.className = 'product-cell description';
+      descriptionCell.innerHTML = `<span class="cell-label">Description:</span>${item.description}`;
+      row.appendChild(descriptionCell);
+
+      const actionCell = document.createElement('div');
+      actionCell.className = 'product-cell action';
+      actionCell.innerHTML = `<button class="edit-button">Edit</button> <button class="delete-button">Hapus</button>`;
+      row.appendChild(actionCell);
+
+      container.appendChild(row);
+    });
   } else {
-      container.innerHTML = '<p>No products available.</p>';
+    container.innerHTML = '<p>No products available.</p>';
   }
-}
 
+  container.addEventListener('click', (event) => {
+    if (event.target.classList.contains('edit-button')) {
+      const id = event.target.closest('.products-row').querySelector('.id').textContent;
+      alert(`Edit ${id}`); // Tempat untuk fungsi edit
+    } else if (event.target.classList.contains('delete-button')) {
+      const id = event.target.closest('.products-row').querySelector('.id').textContent;
+      alert(`Delete ${id}`); // Tempat untuk fungsi hapus
+    }
+  });
+}
 
 document.querySelector(".jsFilter").addEventListener("click", function () {
   document.querySelector(".filter-menu").classList.toggle("active");
