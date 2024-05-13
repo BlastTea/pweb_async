@@ -31,7 +31,7 @@ CREATE TABLE `tour_packages` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `name` varchar(100) NOT NULL,
   `price` double NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
