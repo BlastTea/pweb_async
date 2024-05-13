@@ -18,7 +18,8 @@
   --action-color-hover: #6291fd;
   --app-content-secondary-color: #1d283c;
   --filter-reset: #2c394f;
-  --filter-shadow: rgba(16, 24, 39, 0.8) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  --filter-shadow: rgba(16, 24, 39, 0.8) 0px 6px 12px -2px,
+    rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
 }
 
 .light:root {
@@ -468,12 +469,34 @@ body {
 }
 
 .tableView .product-cell {
-  flex: 1;
   padding: 8px 16px;
   color: var(--app-content-main-color);
   font-size: 14px;
   display: flex;
   align-items: center;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tableView .product-cell.id {
+  flex: 0.05;
+}
+
+.tableView .product-cell.name {
+  flex: 0.25;
+}
+
+.tableView .product-cell.price {
+  flex: 0.2;
+}
+
+.tableView .product-cell.description {
+  flex: 0.4;
+}
+
+.tableView .product-cell.action {
+  flex: 0.1;
 }
 
 .tableView .product-cell img {
@@ -498,7 +521,6 @@ body {
 }
 
 @media screen and (max-width: 520px) {
-
   .tableView .product-cell.category,
   .tableView .product-cell.sales {
     display: none;
@@ -695,7 +717,7 @@ body {
   margin-right: 5px;
   font-size: 14px;
   color: white;
-  background-color: #5C6BC0;
+  background-color: #5c6bc0;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -703,10 +725,94 @@ body {
 }
 
 .delete-button {
-  background-color: #E53935;
+  background-color: #e53935;
 }
 
 .edit-button:hover,
 .delete-button:hover {
   opacity: 0.9;
+}
+
+/*Dialog Styles*/
+dialog {
+  padding: 2rem;
+  background: var(--sidebar);
+  width: 60vw;
+  max-width: 600px;
+  border-radius: 20px;
+  border: 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.5s ease both;
+}
+
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+dialog .x {
+  filter: grayscale(1);
+  border: none;
+  background: none;
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  transition: ease filter, transform 0.3s;
+  cursor: pointer;
+}
+
+dialog .x:hover {
+  filter: grayscale(0);
+  transform: scale(1.1);
+}
+
+dialog h2 {
+  font-weight: 600;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+dialog label {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+dialog input[type="text"],
+dialog textarea {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+}
+
+dialog input[type="text"]:focus,
+dialog textarea:focus {
+  outline: none;
+  border-color: rgb(29, 92, 255);
+}
+
+dialog button[type="submit"] {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0;
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: #fff;
+  background-color: rgb(29, 92, 255);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+dialog button[type="submit"]:hover {
+  background-color: rgba(29, 92, 255, 0.9);
+}
+
+#editModal label {
+  display: block;
+  color: white;
 }
